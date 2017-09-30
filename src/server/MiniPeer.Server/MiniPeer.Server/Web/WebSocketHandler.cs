@@ -12,22 +12,25 @@ namespace MiniPeer.Server.Web
 {
     public class WebSocketHandler : DependencyObject
     {
-        private WebSocket _ws;
+        public WebSocket Connection { get; }
+
+        public string Id { get; }
 
         private CancellationToken _cancelTok;
 
-        public WebSocketHandler(WebSocket websocket, CancellationToken token, ISContext serverContext) : base(serverContext)
+        public WebSocketHandler(WebSocket websocket, CancellationToken token, string id, ISContext serverContext) : base(serverContext)
         {
-            _ws = websocket;
+            Connection = websocket;
+            Id = id;
             _cancelTok = token;
         }
 
         public async Task EventLoop()
         {
-            while (!_cancelTok.IsCancellationRequested && _ws.State == WebSocketState.Open)
+            while (!_cancelTok.IsCancellationRequested && Connection.State == WebSocketState.Open)
             {
                 // recieve data
-                
+
             }
         }
 
@@ -37,8 +40,11 @@ namespace MiniPeer.Server.Web
                 return;
 
             var ct = hc.RequestAborted;
+            var socketId = Guid.NewGuid().ToString("N");
             var ws = await hc.WebSockets.AcceptWebSocketAsync();
-            var h = new WebSocketHandler(ws, ct, context);
+            var h = new WebSocketHandler(ws, ct, socketId, context);
+            // add to client list
+            context.Clients.TryAdd(socketId, new PeerClient(h));
             await h.EventLoop();
         }
 

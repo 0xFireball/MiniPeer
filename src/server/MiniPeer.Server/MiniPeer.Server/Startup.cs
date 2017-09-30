@@ -24,7 +24,7 @@ namespace MiniPeer.Server
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             var serverContext = new ServerContext();
-            app.Map("/ws", a => WebSocketHandler.Map(a, context));
+            app.Map("/ws", a => WebSocketHandler.Map(a, serverContext));
         }
     }
 }
