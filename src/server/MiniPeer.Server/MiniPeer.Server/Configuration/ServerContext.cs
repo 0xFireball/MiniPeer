@@ -10,7 +10,7 @@ namespace MiniPeer.Server.Configuration
 
     public class ServerContext : ISContext
     {
-        public ConcurrentDictionary<string, PeerClient> Clients { get; }
+        public ConcurrentDictionary<string, PeerClient> Clients { get; } = new ConcurrentDictionary<string, PeerClient>();
 
         public MiniPeerConfiguration Configuration { get; }
 

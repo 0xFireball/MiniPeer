@@ -52,7 +52,10 @@ namespace MiniPeer.Server.Web
                 {
                     // send data
                     var targetPeer = ServerContext.Clients[targetId];
-                    await targetPeer.Handler.SendDataAsync(dataBundle["data"].ToString());
+                    await targetPeer.Handler.SendDataAsync(new JObject(
+                        new JProperty("type", "data"),
+                        new JProperty("data", (string)dataBundle["data"])
+                    ).ToString());
 
                     // send result
                     await SendDataAsync(new JObject(
@@ -90,7 +93,7 @@ namespace MiniPeer.Server.Web
         public Task SendDataAsync(byte[] buf)
         {
             var seg = new ArraySegment<byte>(buf);
-            return Connection.SendAsync(seg, WebSocketMessageType.Binary, true, _cancelTok);
+            return Connection.SendAsync(seg, WebSocketMessageType.Text, true, _cancelTok);
         }
 
         public static async Task AcceptWebSocketClients(HttpContext hc, Func<Task> n, ISContext context)
@@ -99,14 +102,18 @@ namespace MiniPeer.Server.Web
                 return;
 
             var ct = hc.RequestAborted;
-            var socketId = Guid.NewGuid().ToString("N");
+            var peerId = Guid.NewGuid().ToString("N");
             var ws = await hc.WebSockets.AcceptWebSocketAsync();
             var h = new WebSocketHandler(ws, ct, context);
             // add to client list
-            context.Clients.TryAdd(socketId, new PeerClient(h, socketId));
+            context.Clients.TryAdd(peerId, new PeerClient(h, peerId));
+            // send peer id to client
+            await h.SendDataAsync(new JObject(
+                new JProperty("id", peerId)
+            ).ToString());
             await h.EventLoop();
 
-            context.Clients.TryRemove(socketId, out var rem);
+            context.Clients.TryRemove(peerId, out var rem);
 
             await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", ct);
             ws.Dispose();

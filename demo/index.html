@@ -1,0 +1,40 @@
+<html>
+
+<head>
+    <title>MiniPeer Demo</title>
+    <!-- Roboto Font -->
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+
+    <link rel="stylesheet" href="lib/milligram.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="main">
+        <div class="container">
+            <div id="vue-app">
+                <div class="title">
+                    <h1>{{ app_name }}</h1>
+                </div>
+
+                <div class="chat" v-if="peerConnected">
+                </div>
+                <div class="server-conn" v-else-if="!clientConnected">
+                    <input type="text" placeholder="server websocket url" v-model="server_url">
+                    <a class="button" v-on:click="connectClient">Connect to server</a>
+                </div>
+                <div class="client-conn" v-else>
+                    <input type="text" placeholder="peer id" v-model="peer_id">
+                    <a class="button" v-on:click="connectPeer">Connect</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../src/client/minipeer.js"></script>
+    <script src="lib/vue.min.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
