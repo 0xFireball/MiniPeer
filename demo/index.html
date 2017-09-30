@@ -20,8 +20,8 @@
 
         <div class="chat" v-if="peerConnected">
           <!-- messages -->
-          <template v-for="(m, ix) in messages" :key="ix">
-            <p>{{ m }}</p>
+          <template v-for="(ms, ix) in messages" :key="ix">
+            <p>{{ ms.n }}: {{ ms.m }}</p>
           </template>
           <!-- send -->
           <input type="text" placeholder="message" v-model="c_message">
@@ -32,6 +32,7 @@
           <a class="button" v-on:click="connectClient">Connect to server</a>
         </div>
         <div class="client-conn" v-else>
+          <input type="text" placeholder="chat name" v-model="chat_name">
           <input type="text" placeholder="peer id" v-model="peer_id">
           <a class="button" v-on:click="connectPeer">Connect</a>
         </div>
