@@ -4,9 +4,12 @@ namespace MiniPeer.Server.Web
     {
         public WebSocketHandler Handler { get; }
 
-        public PeerClient(WebSocketHandler handler)
+        public string Id { get; }
+
+        public PeerClient(WebSocketHandler handler, string id)
         {
             Handler = handler;
+            Id = id;
         }
     }
 }
