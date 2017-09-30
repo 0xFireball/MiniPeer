@@ -21,10 +21,13 @@ namespace MiniPeer.Server.Web
 
         private CancellationToken _cancelTok;
 
-        public WebSocketHandler(WebSocket websocket, CancellationToken token, ISContext serverContext) : base(serverContext)
+        private string _id;
+
+        public WebSocketHandler(WebSocket websocket, CancellationToken token, string id, ISContext serverContext) : base(serverContext)
         {
             Connection = websocket;
             _cancelTok = token;
+            _id = id;
         }
 
         public async Task EventLoop()
@@ -54,7 +57,8 @@ namespace MiniPeer.Server.Web
                     var targetPeer = ServerContext.Clients[targetId];
                     await targetPeer.Handler.SendDataAsync(new JObject(
                         new JProperty("type", "data"),
-                        new JProperty("data", (string)dataBundle["data"])
+                        new JProperty("data", (string)dataBundle["data"]),
+                        new JProperty("source", _id)
                     ).ToString());
 
                     // send result
@@ -104,7 +108,7 @@ namespace MiniPeer.Server.Web
             var ct = hc.RequestAborted;
             var peerId = Guid.NewGuid().ToString("N");
             var ws = await hc.WebSockets.AcceptWebSocketAsync();
-            var h = new WebSocketHandler(ws, ct, context);
+            var h = new WebSocketHandler(ws, ct, peerId, context);
             // add to client list
             context.Clients.TryAdd(peerId, new PeerClient(h, peerId));
             // send peer id to client

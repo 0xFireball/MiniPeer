@@ -25,7 +25,12 @@ class MiniPeer {
       let bundle = JSON.parse(e.data)
       if (bundle['type'] === 'data') {
         if (this.recv_cb) {
-          this.recv_cb(bundle['data'])
+          // create friendly bundle
+          let b = {
+            data: bundle['data'],
+            source: bundle['source']
+          }
+          this.recv_cb(b)
         }
       } else if (bundle['success'] !== undefined) {
         let success = bundle['success']
