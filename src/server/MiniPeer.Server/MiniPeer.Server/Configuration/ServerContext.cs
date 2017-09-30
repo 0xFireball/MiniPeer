@@ -11,5 +11,12 @@ namespace MiniPeer.Server.Configuration
     public class ServerContext : ISContext
     {
         public ConcurrentDictionary<string, PeerClient> Clients { get; }
+
+        public MiniPeerConfiguration Configuration { get; }
+
+        public ServerContext(MiniPeerConfiguration config)
+        {
+            Configuration = config;
+        }
     }
 }

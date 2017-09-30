@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using MiniPeer.Server.Configuration;
 using System.IO;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 namespace MiniPeer.Server.Web
 {
@@ -31,12 +32,37 @@ namespace MiniPeer.Server.Web
             while (!_cancelTok.IsCancellationRequested && Connection.State == WebSocketState.Open)
             {
                 // recieve data
+                var data = await ReceiveDataAsync();
+                var dataStr = Encoding.UTF8.GetString(data);
+                if (string.IsNullOrEmpty(dataStr))
+                {
+                    break;
+                }
+                var dataBundle = JObject.Parse(dataStr);
+                var targetId = (string)dataBundle["target"];
+                // find a target with matching id
+                if (!ServerContext.Clients.ContainsKey(targetId))
+                {
+                    await SendDataAsync(new JObject(
+                        new JProperty("success", false),
+                        new JProperty("error", "notfound")
+                    ).ToString());
+                }
+                else
+                {
+                    // send data
+                    var targetPeer = ServerContext.Clients[targetId];
+                    await targetPeer.Handler.SendDataAsync(dataBundle["data"].ToString());
 
-
+                    // send result
+                    await SendDataAsync(new JObject(
+                        new JProperty("success", true)
+                    ).ToString());
+                }
             }
         }
 
-        public async Task<byte[]> RecieveDataAsync()
+        public async Task<byte[]> ReceiveDataAsync()
         {
             var buffer = new ArraySegment<byte>(new byte[BUF_SIZE]);
             using (var ms = new MemoryStream())
