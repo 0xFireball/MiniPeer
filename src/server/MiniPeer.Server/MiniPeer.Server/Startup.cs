@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MiniPeer.Server.Configuration;
 using MiniPeer.Server.Web;
+using Nancy;
+using Nancy.Owin;
 using Newtonsoft.Json;
 
 namespace MiniPeer.Server
@@ -40,6 +42,11 @@ namespace MiniPeer.Server
 
             var serverContext = new ServerContext(config);
             app.Map("/ws", a => WebSocketHandler.Map(a, serverContext));
+
+            app.UseOwin(x => x.UseNancy(options => options.PassThroughWhenStatusCodesAre(
+                HttpStatusCode.NotFound,
+                HttpStatusCode.InternalServerError
+            )));
         }
     }
 }
