@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MiniPeer.Server.Configuration;
+using MiniPeer.Server.Web;
 
 namespace MiniPeer.Server
 {
@@ -21,17 +23,8 @@ namespace MiniPeer.Server
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.Run(async (context) =>
-            {
-                await context.Response.WriteAsync("Hello World!");
-            });
+            var serverContext = new ServerContext();
+            app.Map("/ws", a => WebSocketHandler.Map(a, context));
         }
     }
 }
